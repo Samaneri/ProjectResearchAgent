@@ -1,0 +1,414 @@
+
+import { useState } from "react";
+import "./App.css";
+
+function App() {
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+
+  const researchProduct = async () => {
+    if (!query.trim()) {
+      alert("Please enter a product query");
+      return;
+    }
+
+    setLoading(true);
+    setResult("");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/research", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: query,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Backend error");
+      }
+
+      const data = await response.json();
+
+      setResult(data.answer);
+
+      setHistory((previous) => [
+        ...previous,
+        {
+          query: query,
+          answer: data.answer,
+        },
+      ]);
+    } catch (error) {
+      setResult(
+        "Unable to connect to the backend. Please make sure your FastAPI server is running."
+      );
+    }
+
+    setLoading(false);
+  };
+
+  const useExample = (text) => {
+    setQuery(text);
+  };
+
+  return (
+    <div className="app">
+
+      {/* NAVBAR */}
+      <nav className="navbar">
+
+        <div className="logo">
+          🛍️ Product<span>ResearchAI</span>
+        </div>
+
+        <div className="nav-links">
+          <a href="#home">Home</a>
+          <a href="#features">Features</a>
+          <a href="#results">Research</a>
+          <a href="#history">History</a>
+        </div>
+
+      </nav>
+
+
+      {/* HERO */}
+      <section className="hero" id="home">
+
+        <div className="hero-content">
+
+          <div className="badge">
+            ✨ AI POWERED PRODUCT RESEARCH
+          </div>
+
+          <h1>
+            Research products
+            <br />
+            <span>smarter with AI.</span>
+          </h1>
+
+          <p>
+            Search the web, analyze product information, compare products
+            and get intelligent recommendations using AI.
+          </p>
+
+
+          {/* SEARCH */}
+          <div className="search-container">
+
+            <input
+              type="text"
+              placeholder="Search a product or compare products..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  researchProduct();
+                }
+              }}
+            />
+
+            <button
+              onClick={researchProduct}
+              disabled={loading}
+            >
+              {loading ? "Researching..." : "🔍 Research"}
+            </button>
+
+          </div>
+
+
+          {/* EXAMPLES */}
+          <div className="examples">
+
+            <span>Try:</span>
+
+            <button
+              onClick={() =>
+                useExample(
+                  "Compare iPhone 17 and Samsung Galaxy S26"
+                )
+              }
+            >
+              📱 Compare Phones
+            </button>
+
+            <button
+              onClick={() =>
+                useExample(
+                  "Best laptop under 80000 in India"
+                )
+              }
+            >
+              💻 Find Laptop
+            </button>
+
+            <button
+              onClick={() =>
+                useExample(
+                  "Best wireless headphones under 10000"
+                )
+              }
+            >
+              🎧 Find Headphones
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* FEATURES */}
+      <section className="features" id="features">
+
+        <div className="section-title">
+
+          <p>WHAT WE DO</p>
+
+          <h2>
+            Your intelligent product
+            <span> research assistant</span>
+          </h2>
+
+        </div>
+
+
+        <div className="feature-grid">
+
+          <div className="feature-card">
+
+            <div className="feature-icon">
+              🔎
+            </div>
+
+            <h3>Web Search</h3>
+
+            <p>
+              Search the web and collect the latest product
+              information using Tavily.
+            </p>
+
+          </div>
+
+
+          <div className="feature-card">
+
+            <div className="feature-icon">
+              ⚖️
+            </div>
+
+            <h3>Compare Products</h3>
+
+            <p>
+              Compare specifications, features, prices,
+              advantages and disadvantages.
+            </p>
+
+          </div>
+
+
+          <div className="feature-card">
+
+            <div className="feature-icon">
+              🤖
+            </div>
+
+            <h3>AI Recommendation</h3>
+
+            <p>
+              Get an AI-powered recommendation based on
+              the collected product information.
+            </p>
+
+          </div>
+
+
+          <div className="feature-card">
+
+            <div className="feature-icon">
+              🧠
+            </div>
+
+            <h3>AI Memory</h3>
+
+            <p>
+              Remember previous questions and continue
+              the research conversation.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* RESULT */}
+      <section className="research-section" id="results">
+
+        <div className="section-title">
+
+          <p>AI RESEARCH</p>
+
+          <h2>
+            Product Research <span>Results</span>
+          </h2>
+
+        </div>
+
+
+        {!result && !loading && (
+
+          <div className="empty-result">
+
+            <div className="robot">
+              🤖
+            </div>
+
+            <h3>
+              Start your product research
+            </h3>
+
+            <p>
+              Enter a product above and let AI research
+              the web for you.
+            </p>
+
+          </div>
+
+        )}
+
+
+        {loading && (
+
+          <div className="loading-box">
+
+            <div className="spinner"></div>
+
+            <h3>
+              AI is researching...
+            </h3>
+
+            <p>
+              Searching the web and analyzing product information.
+            </p>
+
+          </div>
+
+        )}
+
+
+        {result && !loading && (
+
+          <div className="result-card">
+
+            <div className="result-header">
+
+              <div>
+                <span className="ai-label">
+                  🤖 AI ANALYSIS
+                </span>
+
+                <h3>
+                  Research Result
+                </h3>
+              </div>
+
+            </div>
+
+
+            <div className="result-content">
+              {result}
+            </div>
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* HISTORY */}
+      <section className="history-section" id="history">
+
+        <div className="section-title">
+
+          <p>MEMORY</p>
+
+          <h2>
+            Research <span>History</span>
+          </h2>
+
+        </div>
+
+
+        {history.length === 0 ? (
+
+          <div className="no-history">
+
+            🧠
+
+            <p>
+              Your research history will appear here.
+            </p>
+
+          </div>
+
+        ) : (
+
+          <div className="history-list">
+
+            {history.map((item, index) => (
+
+              <div
+                className="history-card"
+                key={index}
+              >
+
+                <div className="history-query">
+                  🔎 {item.query}
+                </div>
+
+                <div className="history-answer">
+                  {item.answer}
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </section>
+
+
+      {/* FOOTER */}
+      <footer>
+
+        <div className="footer-logo">
+          🛍️ ProductResearchAI
+        </div>
+
+        <p>
+          AI-powered product research and comparison system
+        </p>
+
+        <p className="copyright">
+          © 2026 ProductResearchAI
+        </p>
+
+      </footer>
+
+    </div>
+  );
+}
+
+
